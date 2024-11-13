@@ -28,6 +28,11 @@ int progress = 0;
 bool redrawProgress = true;
 int lastRedrawTime = 0;
 
+// for drawing green background
+bool showSuccessBackground = false;
+unsigned long successDisplayTime = 0;
+const unsigned long successDuration = 500;  // Display duration in milliseconds
+
 //we could also use xSemaphoreGiveFromISR and its associated fxns, but this is fine
 volatile bool scheduleCmdAsk = true;
 hw_timer_t *askRequestTimer = NULL;
@@ -97,9 +102,13 @@ void receiveCallback(const esp_now_recv_info_t *macAddr, const uint8_t *data, in
     timerWrite(askExpireTimer, 0);
     timerStop(askExpireTimer);
     cmdRecvd = waitingCmd;
-    progress = progress + 1;
+    progress = progress + 10; // total is 100, changed from +1 to +10 for quicker complete
     broadcast("P: " + String(progress));
     redrawCmdRecvd = true;
+
+    // Trigger green background display
+    showSuccessBackground = true;
+    successDisplayTime = millis();
 
   } else if (recvd[0] == 'P') {
     recvd.remove(0, 3);
@@ -259,7 +268,23 @@ void loop() {
     askExpired = false;
   }
 
+  // Check if we should display the green background
+  if (showSuccessBackground) {
+    // Display green background
+    tft.fillScreen(TFT_GREEN);
+
+    // Check if the display duration has passed, then reset the screen
+    if (millis() - successDisplayTime > successDuration) {
+      showSuccessBackground = false;
+      redrawCmdRecvd = true;
+      redrawProgress = true;  // Set flag to redraw the progress bar as well
+      tft.fillScreen(TFT_BLACK); 
+      drawControls();         // Redraw button commands after green flash
+    }
+  }
+  
   if ((millis() - lastRedrawTime) > 50) {
+    // Continue with normal progress bar display logic
     tft.fillRect(15, lineHeight * 2 + 14, 100, 6, TFT_GREEN);
     tft.fillRect(16, lineHeight * 2 + 14 + 1, (((expireLength * 1000000.0) - timerRead(askExpireTimer)) / (expireLength * 1000000.0)) * 98, 4, TFT_RED);
     lastRedrawTime = millis();

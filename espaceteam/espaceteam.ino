@@ -33,6 +33,7 @@ bool showSuccessBackground = false;
 unsigned long successDisplayTime = 0;
 const unsigned long successDuration = 500;  // Display duration in milliseconds
 
+
 //we could also use xSemaphoreGiveFromISR and its associated fxns, but this is fine
 volatile bool scheduleCmdAsk = true;
 hw_timer_t *askRequestTimer = NULL;
@@ -298,6 +299,7 @@ void receiveCallback(const esp_now_recv_info_t *macAddr, const uint8_t *data, in
     showSuccessBackground = true;
     successDisplayTime = millis();
 
+
   } else if (recvd[0] == 'P') {
     recvd.remove(0, 3);
     progress = recvd.toInt();
@@ -420,8 +422,8 @@ String genCommand() {
   return noun1 + noun2;
 }
 
-void drawShape(const uint8_t *shapeImg, int x, int y, int height) {
-  tft.drawBitmap(x, y, shapeImg, 16, 16, TFT_PINK); // Assumes shape images are 16x16 pixels
+void drawShape(const uint8_t *shapeImg, int x, int y, int height, uint16_t color) {
+  tft.drawBitmap(x, y, shapeImg, 16, 16, color); // Draws the shape with the given color
 }
 
 const int textOffset = 25;     // Offset for the text after "B1:" or "B2:"
@@ -429,15 +431,33 @@ const int textOffset = 25;     // Offset for the text after "B1:" or "B2:"
 void drawControls() {
   cmd1 = genCommand();
   cmd2 = genCommand();
+
    // Extract parts of the command for alignment
   String noun1 = cmd1.substring(cmd1.indexOf(' ') + 1);
   String noun2 = cmd2.substring(cmd2.indexOf(' ') + 1);
   
   tft.drawString("1: ", 0, 90, 1.5);
-  drawShape(commandImages[random(ARRAY_SIZE)], 5, 120, 50);
+  drawShape(commandImages[random(ARRAY_SIZE)], 5, 120, 50, color1);
   tft.drawString(noun1, textOffset, 120, 1.5);
-  
-  drawShape(commandImages[random(ARRAY_SIZE)], 5, 200, 50);
+  tft.drawString("2: ", 0, 180, 1.5);
+  drawShape(commandImages[random(ARRAY_SIZE)], 5, 200, 50, color2);
+  tft.drawString(noun2, textOffset, 200, 1.5);
+}
+
+// Recolor text for pressed button indication
+void recolorTextLeft(uint16_t color) {
+  tft.setTextColor(color);
+  // Draw the command shape and noun for left button
+  drawShape(commandImages[random(ARRAY_SIZE)], 5, 120, 50, color);
+  String noun1 = cmd1.substring(cmd1.indexOf(' ') + 1); // Extract noun from cmd1
+  tft.drawString(noun1, textOffset, 120, 1.5);
+}
+
+void recolorTextRight(uint16_t color) {
+  tft.setTextColor(color);
+  // Draw the command shape and noun for right button
+  drawShape(commandImages[random(ARRAY_SIZE)], 5, 200, 50, color);
+  String noun2 = cmd2.substring(cmd2.indexOf(' ') + 1); // Extract noun from cmd2
   tft.drawString(noun2, textOffset, 200, 1.5);
 }
 
@@ -498,14 +518,14 @@ void loop() {
     tft.fillRect(15, lineHeight * 2 + 14, 100, 6, TFT_GREEN);
     tft.fillRect(16, lineHeight * 2 + 14 + 1, (((expireLength * 1000000.0) - timerRead(askExpireTimer)) / (expireLength * 1000000.0)) * 98, 4, TFT_RED);
 
-    // Recolor the text when the button is pressed
     if (digitalRead(BUTTON_LEFT) == 0) {
-      recolorTextLeft(TFT_BLUE);
-    } else if (digitalRead(BUTTON_RIGHT) == 0) {
-      recolorTextRight(TFT_BLUE);
-    } else {
       recolorTextLeft(TFT_GREEN);
+    } else if (digitalRead(BUTTON_RIGHT) == 0) {
       recolorTextRight(TFT_GREEN);
+    } else {
+      recolorTextLeft(TFT_SKYBLUE);
+      recolorTextRight(TFT_SKYBLUE);
+
     }
     lastRedrawTime = millis();
   }

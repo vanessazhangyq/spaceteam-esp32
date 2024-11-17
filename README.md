@@ -1,6 +1,6 @@
 # Spaceteam ESP32 Visual Enhancement Project
 
-This project builds upon the raw **Spaceteam ESP32** code from ****https://github.com/ttseng/COMS3930-Fall2024/blob/main/Module%203/espaceteam.ino  by enhancing the **visual experience** for players, making the game more interactive and engaging. Spaceteam is a cooperative multitasking game where players receive and execute commands to achieve a shared goal. We focused on adding three key **visual feedback features** to improve the user experience.
+This project builds upon the raw **Spaceteam ESP32** game ([original code](https://github.com/ttseng/COMS3930-Fall2024/blob/main/Module%203/espaceteam.ino)) by enhancing the **visual experience** for players, making the game more interactive and engaging. Spaceteam is a cooperative multitasking game where players receive and execute commands to achieve a shared goal. We focused on adding three key **visual feedback features** to improve the user experience.
 
 ## New Features
 
@@ -24,8 +24,6 @@ Each action is now paired with a unique **shape** alongside the textual command.
     - The game uses the following shapes for actions:
         - Square | Circle | Triangle | Star | Diamond | Hexagon | Octagon | Cross | Arrow | Heart
 - **Why It’s Useful**: Adding shapes introduces a new layer of complexity and fun! :p
-
----
 
 ## Setup Instructions
 

@@ -12,7 +12,7 @@ When an action is successfully completed (a `"DONE"` message is received), all p
 
 ### 2. **Visual Feedback for Button Presses**
 
-When a player presses a button, the corresponding action text changes its color to **blue**, giving immediate feedback that the button press has been registered.
+When a player presses a button, the corresponding action text changes its color to **green**, giving immediate feedback that the button press has been registered.
 
 - **Why It’s Useful**: This feedback confirms to the player that their button press has been recognized, reducing confusion during fast-paced gameplay.
 

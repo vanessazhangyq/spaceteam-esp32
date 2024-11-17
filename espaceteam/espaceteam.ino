@@ -28,9 +28,11 @@ int progress = 0;
 bool redrawProgress = true;
 int lastRedrawTime = 0;
 
+// for drawing green background
 bool showSuccessBackground = false;
 unsigned long successDisplayTime = 0;
-const unsigned long successDuration = 500;
+const unsigned long successDuration = 500;  // Display duration in milliseconds
+
 
 //we could also use xSemaphoreGiveFromISR and its associated fxns, but this is fine
 volatile bool scheduleCmdAsk = true;
@@ -289,11 +291,15 @@ void receiveCallback(const esp_now_recv_info_t *macAddr, const uint8_t *data, in
     timerWrite(askExpireTimer, 0);
     timerStop(askExpireTimer);
     cmdRecvd = waitingCmd;
-    progress = progress + 1;
+    progress = progress + 10; // total is 100, changed from +1 to +10 for quicker complete
     broadcast("P: " + String(progress));
     redrawCmdRecvd = true;
+
+    // Trigger green background display
     showSuccessBackground = true;
     successDisplayTime = millis();
+
+
   } else if (recvd[0] == 'P') {
     recvd.remove(0, 3);
     progress = recvd.toInt();
@@ -455,6 +461,19 @@ void recolorTextRight(uint16_t color) {
   tft.drawString(noun2, textOffset, 200, 1.5);
 }
 
+// Recolor text for pressed button indication
+void recolorTextLeft(uint16_t color) {
+  tft.setTextColor(color);
+  tft.drawString("B1: " + cmd1.substring(0, cmd1.indexOf(' ')), 0, 90, 2);
+  tft.drawString(cmd1.substring(cmd1.indexOf(' ') + 1), 0, 90 + lineHeight, 2);
+}
+
+void recolorTextRight(uint16_t color) {
+  tft.setTextColor(color);
+  tft.drawString("B2: " + cmd2.substring(0, cmd2.indexOf(' ')), 0, 170, 2);
+  tft.drawString(cmd2.substring(cmd2.indexOf(' ') + 1), 0, 170 + lineHeight, 2);
+}
+
 void loop() {
 
   if (scheduleCmd1Send) {
@@ -478,6 +497,8 @@ void loop() {
     redrawCmdRecvd = true;
     askExpired = false;
   }
+
+  // Check if we should display the green background
   if (showSuccessBackground) {
     // Display green background
     tft.fillScreen(TFT_GREEN);
@@ -491,9 +512,12 @@ void loop() {
       drawControls();         // Redraw button commands after green flash
     }
   }
+  
   if ((millis() - lastRedrawTime) > 50) {
+    // Continue with normal progress bar display logic
     tft.fillRect(15, lineHeight * 2 + 14, 100, 6, TFT_GREEN);
     tft.fillRect(16, lineHeight * 2 + 14 + 1, (((expireLength * 1000000.0) - timerRead(askExpireTimer)) / (expireLength * 1000000.0)) * 98, 4, TFT_RED);
+
     if (digitalRead(BUTTON_LEFT) == 0) {
       recolorTextLeft(TFT_GREEN);
     } else if (digitalRead(BUTTON_RIGHT) == 0) {
@@ -501,6 +525,7 @@ void loop() {
     } else {
       recolorTextLeft(TFT_SKYBLUE);
       recolorTextRight(TFT_SKYBLUE);
+
     }
     lastRedrawTime = millis();
   }

@@ -37,3 +37,6 @@ Each action is now paired with a unique **shape** alongside the textual command.
     - Upload the code to each ESP32 device using the Arduino IDE
 
 have fun playing!
+
+![Giphy Animation](https://media.giphy.com/media/TshmwZLU276Sq65f7j/giphy.gif)
+

@@ -244,6 +244,19 @@ void drawControls() {
   tft.drawString(cmd2.substring(cmd2.indexOf(' ') + 1), 0, 170 + lineHeight, 2);
 }
 
+// Recolor text for pressed button indication
+void recolorTextLeft(uint16_t color) {
+  tft.setTextColor(color);
+  tft.drawString("B1: " + cmd1.substring(0, cmd1.indexOf(' ')), 0, 90, 2);
+  tft.drawString(cmd1.substring(cmd1.indexOf(' ') + 1), 0, 90 + lineHeight, 2);
+}
+
+void recolorTextRight(uint16_t color) {
+  tft.setTextColor(color);
+  tft.drawString("B2: " + cmd2.substring(0, cmd2.indexOf(' ')), 0, 170, 2);
+  tft.drawString(cmd2.substring(cmd2.indexOf(' ') + 1), 0, 170 + lineHeight, 2);
+}
+
 void loop() {
 
   if (scheduleCmd1Send) {
@@ -287,6 +300,16 @@ void loop() {
     // Continue with normal progress bar display logic
     tft.fillRect(15, lineHeight * 2 + 14, 100, 6, TFT_GREEN);
     tft.fillRect(16, lineHeight * 2 + 14 + 1, (((expireLength * 1000000.0) - timerRead(askExpireTimer)) / (expireLength * 1000000.0)) * 98, 4, TFT_RED);
+
+    // Recolor the text when the button is pressed
+    if (digitalRead(BUTTON_LEFT) == 0) {
+      recolorTextLeft(TFT_BLUE);
+    } else if (digitalRead(BUTTON_RIGHT) == 0) {
+      recolorTextRight(TFT_BLUE);
+    } else {
+      recolorTextLeft(TFT_GREEN);
+      recolorTextRight(TFT_GREEN);
+    }
     lastRedrawTime = millis();
   }
 
